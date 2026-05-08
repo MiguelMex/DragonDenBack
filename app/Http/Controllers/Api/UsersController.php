@@ -103,6 +103,17 @@ class UsersController extends Controller
         }
     }
 
+    public function getOwnReadLists(){
+        try{
+            $id = auth()->id();
+            $user = User::with('readListsRelation')->findOrFail($id);
+            return new UserReadListsResource($user);
+        }
+        catch(Exception $ex){
+            return response()->json((["Error"=>$ex->getMessage()]));
+        }
+    }
+
     /**
      * return the comments of an user
      * @return \Illuminate\Http\JsonResponse|UserCommentsResource

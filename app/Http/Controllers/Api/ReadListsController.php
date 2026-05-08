@@ -137,12 +137,37 @@ class ReadListsController extends Controller
             $validated = $request->validated();
             $list = ReadLists::findOrFail($validated['read_list']);
             $work = Works::findOrFail($validated['work']);
-
+            //Make sure the work does not belong to the user but the list does
+            $id = auth()->id();
+            if($id !== $list->user || $id === $work->author){
+                return response()->json(['Error'=>'Usuario no autorizado'],500);
+            }
             $list->workRelation()->syncWithoutDetaching($work->work_id);
             $list->load('workRelation');
             return new ReadListWorkResource($list);
         } catch (Exception $ex) {
             return response()->json(["Error"=> "Error al crear relación con trabajo: ".$ex->getMessage()],500);
+        }
+    }
+
+    public function workRemove(StoreReadListsWorksRequest $request){
+        try{
+            $validated = $request->validated();
+            $list = ReadLists::findOrFail($validated['read_list']);
+            $work = Works::findOrFail($validated['work']);
+            
+            $id = auth()->id();
+            if($id !== $list->user || $id === $work->author){
+                return response()->json(['Error'=>'Usuario no autorizado'],500);
+            }
+
+            $list->workRelation()->detach($work->work_id);
+            $list->load('workRelation');
+
+            return new ReadListWorkResource($list);
+        }
+        catch (Exception $ex){
+            return response()->json(['Error'=>$ex->getMessage()],500);
         }
     }
 }

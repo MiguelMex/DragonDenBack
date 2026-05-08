@@ -92,6 +92,7 @@ Route::controller(UsersController::class)->group(function(){
     Route::get('/users/{id}/works','getWorks');   
     Route::get('/self/works','getOwnWorks')->middleware('auth:sanctum');
     Route::get('/users/{id}/readLists','getReadList');
+    Route::get('/self/lists','getOwnReadLists')->middleware('auth:sanctum');
     Route::get('/users/{id}/comments','getComments');
     Route::get('/users/{id}/collections','getCollections');
     Route::get('/self/collections','getOwnCollections')->middleware('auth:sanctum');
@@ -175,7 +176,8 @@ Route::controller(ReadListsController::class)->group(function(){
     Route::put('/lists/{id}','update')->middleware('auth:sanctum');
     Route::delete('/lists/{id}','destroy')->middleware('auth:sanctum');
     Route::get('/lists/{id}/works','getWork');
-    Route::post('lists/works','workAttach')->middleware('auth:sanctum');
+    Route::post('/lists/addWork','workAttach')->middleware('auth:sanctum');
+    Route::post('/lists/removeWork','workRemove')->middleware('auth:sanctum');
     Route::get('/lists/{id}/user','getUser');
 });
 
