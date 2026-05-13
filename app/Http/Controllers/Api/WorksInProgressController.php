@@ -11,6 +11,7 @@ use App\Http\Resources\WIPS\WorkInProgressDraftsResource;
 use App\Http\Resources\WIPS\WorkInProgressUserResource;
 use App\Http\Resources\WIPS\WorkInProgressWorkResource;
 use App\Models\Genres;
+use App\Models\profile;
 use App\Models\WorksInProgress;
 use App\Http\Resources\WorksInProgressResource;
 use App\Http\Controllers\Controller;
@@ -44,7 +45,9 @@ class WorksInProgressController extends Controller
     {
         try {
             $validated = $request->validated();
-            $validated['author'] = auth()->id();
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->first();
+            $validated['author'] = $profile->profile_id;
             $exists = WorksInProgress::where('title',$validated['title'])->exists();
             if ($exists)
             {

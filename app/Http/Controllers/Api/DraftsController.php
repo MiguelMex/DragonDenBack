@@ -177,7 +177,10 @@ class DraftsController extends Controller
     {
         try
         {
-            Drafts::findOrFail($id)->delete();
+            $draft = Drafts::findOrFail($id)->delete();
+            if($draft->route && Storage::disk('local')->exists($draft->route)){
+                Storage::disk('local')->delete($draft->route);
+            }
             return response()->json(['Mensaje'=>'Borrador eliminado correctamente']);
         }
         catch (Exception $ex)

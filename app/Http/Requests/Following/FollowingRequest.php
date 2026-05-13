@@ -25,7 +25,7 @@ class FollowingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "user_id" => ['required',Rule::exists('users','user_id')],
+            "user_id" => ['required',Rule::exists('profiles','profile_id')],
         ];
     }
 }

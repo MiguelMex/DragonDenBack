@@ -57,7 +57,7 @@ class Comments extends Model
      */
     public function userRelation():BelongsTo
     {
-        return $this->belongsTo(User::class,'user','user_id');
+        return $this->belongsTo(profile::class,'user','profile_id');
     }
 
     /**

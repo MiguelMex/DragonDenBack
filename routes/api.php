@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ChaptersController;
 use App\Http\Controllers\Api\CollectionsController;
 use App\Http\Controllers\Api\CommentsController;
 use App\Http\Controllers\Api\DraftsController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReadHistoryController;
 use App\Http\Controllers\Api\ReadListsController;
 use App\Http\Controllers\Api\UsersController;
@@ -85,20 +86,33 @@ Route::get('/user',[AuthController::class,'user']);
  * Routes to pull user's resources
  */
 Route::controller(UsersController::class)->group(function(){
-    Route::get('/users/','index')->middleware('auth:sanctum');
-    Route::get('/users/{id}/wips','getWips');
+    Route::get('/users','index');
+    Route::delete('users/{id}','destroy');
+});
+
+/**
+ * Routes for profiles
+ */
+Route::controller(ProfileController::class)->group(function(){
+    Route::get('/profiles','index');
+    Route::post('/profiles','store');
+    Route::get('/profiles/{id}','show');
+    Route::put('/profiles/{id}','update')->middleware('auth:sanctum');
+    Route::post('/self/avatar','updateOwnAvatar')->middleware('auth:sanctum');
+    Route::delete('/profiles/{id}','destroy');
+    Route::get('/profiles/{id}/wips','getWips');
     Route::get('/self/wips','getOwnWips')->middleware('auth:sanctum');
-    Route::get('/users/{id}/histories','getHistories')->middleware('auth:sanctum');
-    Route::get('/users/{id}/works','getWorks');   
+    Route::get('/profiles/{id}/histories','getHistories')->middleware('auth:sanctum');
+    Route::get('/profiles/{id}/works','getWorks');   
     Route::get('/self/works','getOwnWorks')->middleware('auth:sanctum');
-    Route::get('/users/{id}/readLists','getReadList');
+    Route::get('/profiles/{id}/lists','getReadList');
     Route::get('/self/lists','getOwnReadLists')->middleware('auth:sanctum');
-    Route::get('/users/{id}/comments','getComments');
-    Route::get('/users/{id}/collections','getCollections');
+    Route::get('/profiles/{id}/comments','getComments');
+    Route::get('/profiles/{id}/collections','getCollections');
     Route::get('/self/collections','getOwnCollections')->middleware('auth:sanctum');
-    Route::get('/users/{id}/following','getFollowing');
-    Route::get('/users/{id}/followers','getFollowers');
-    Route::get('/users/{id}/follow','follow')->middleware('auth:sanctum');
+    Route::get('/profiles/{id}/following','getFollowing');
+    Route::get('/profiles/{id}/followers','getFollowers');
+    Route::get('/profiles/{id}/follow','follow')->middleware('auth:sanctum');
 });
 
 /**

@@ -25,7 +25,7 @@ class StoreCommenstRequest extends FormRequest
         return [
             'text' => 'required|string|max:10000',
             'chapter' => ['required',Rule::exists('chapters','chapter_id')],
-            'reponse' => ['nullable',Rule::exists('comments','comment_id')],
+            'response' => ['nullable',Rule::exists('comments','comment_id')],
         ];
     }
 }

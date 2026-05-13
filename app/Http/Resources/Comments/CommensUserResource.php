@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Comments;
 
+use App\Http\Resources\Profiles\ProfileResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -22,7 +23,7 @@ class CommensUserResource extends JsonResource
             'response' => $this->response,
             'created_at'=> $this->created_at,
             'updated_at'=> $this->updated_at,
-            'user'=>new UserResource($this->whenLoaded('userRelation'))
+            'user'=>new ProfileResource($this->whenLoaded('userRelation'))
         ];
     }
 }

@@ -16,10 +16,10 @@ class UserHistoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->user_id,
+            'id' => $this->profile_id,
             'nickname' => $this->nickname,
             'name' => $this->name,
-            'email' => $this->email,
+            'description' => $this->description,
             'created_at'=> $this->created_at,
             'updated_at'=> $this->updated_at,
             'history' => ReadHistoryResource::collection($this->whenLoaded('historiesRelation')),

@@ -22,7 +22,7 @@ class ReadHistoryUserResource extends JsonResource
             'chapter'=>$this->chapter,
             'created_at'=>$this->created_at,
             'updated_at'=>$this->updated_at,
-            'user'=>new UserResource($this->whenLoaded('userRelation'))
+            'user'=>new ProfileResource($this->whenLoaded('userRelation'))
         ];
     }
 }

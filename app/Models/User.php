@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -39,12 +40,8 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'nickname',
-        'name',
         'email',
         'password',
-        'description',
-        'avatar'
     ];
 
     /**
@@ -60,67 +57,75 @@ class User extends Authenticatable
     ];
 
     /**
-     * Relationship with the read_history table
-     * 
-     * @return HasMany
+     * Relation with the profile
+     * @return HasOne<profile, User>
      */
-    public function historiesRelation(): HasMany
-    {
-        return $this->hasMany(ReadHistory::class,'user');
+    public function profileRelation(): HasOne{
+        return $this->hasOne(profile::class,'user_id','profile_id');
     }
 
-    public function wipsRelation(): HasMany
-    {
-        return $this->hasMany(WorksInProgress::class,'author');
-    }
+    // /**
+    //  * Relationship with the read_history table
+    //  * 
+    //  * @return HasMany
+    //  */
+    // public function historiesRelation(): HasMany
+    // {
+    //     return $this->hasMany(ReadHistory::class,'user');
+    // }
 
-    /**
-     * Relation with the Works table
-     * 
-     * @return HasMany
-     */
-    public function worksRelation(): HasMany
-    {
-        return $this->hasMany(Works::class,'author');
-    }
+    // public function wipsRelation(): HasMany
+    // {
+    //     return $this->hasMany(WorksInProgress::class,'author');
+    // }
 
-    /**
-     * Relation with the readlist table
-     * @return HasMany<ReadLists, User>
-     */
-    public function readListsRelation():HasMany
-    {
-        return $this->hasMany(ReadLists::class,'user');
-    }
+    // /**
+    //  * Relation with the Works table
+    //  * 
+    //  * @return HasMany
+    //  */
+    // public function worksRelation(): HasMany
+    // {
+    //     return $this->hasMany(Works::class,'author');
+    // }
 
-    /**
-     * Relationship with the comment table
-     * 
-     * @return HasMany
-     */
-    public function commentsRelation(): HasMany
-    {
-        return $this->hasMany(Comments::class,'user');
-    }
+    // /**
+    //  * Relation with the readlist table
+    //  * @return HasMany<ReadLists, User>
+    //  */
+    // public function readListsRelation():HasMany
+    // {
+    //     return $this->hasMany(ReadLists::class,'user');
+    // }
 
-    /**
-     * Relation with the collections table
-     * 
-     * 
-     * @return HasMany<Collections, User>
-     */
-    public function collectionsRelation():HasMany
-    {
-        return $this->hasMany(Collections::class,'user');
-    }
+    // /**
+    //  * Relationship with the comment table
+    //  * 
+    //  * @return HasMany
+    //  */
+    // public function commentsRelation(): HasMany
+    // {
+    //     return $this->hasMany(Comments::class,'user');
+    // }
 
-    public function following():BelongsToMany{
-        return $this->belongsToMany(User::class,'following','user_id','follower_id')->withTimestamps();
-    }
+    // /**
+    //  * Relation with the collections table
+    //  * 
+    //  * 
+    //  * @return HasMany<Collections, User>
+    //  */
+    // public function collectionsRelation():HasMany
+    // {
+    //     return $this->hasMany(Collections::class,'user');
+    // }
 
-    public function followers():BelongsToMany{
-        return $this->belongsToMany(User::class,'following','follower_id','user_id')->withTimestamps();
-    }
+    // public function following():BelongsToMany{
+    //     return $this->belongsToMany(User::class,'following','user_id','follower_id')->withTimestamps();
+    // }
+
+    // public function followers():BelongsToMany{
+    //     return $this->belongsToMany(User::class,'following','follower_id','user_id')->withTimestamps();
+    // }
 
     /**
      * Get the attributes that should be cast.

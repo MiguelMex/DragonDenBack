@@ -10,6 +10,7 @@ use App\Http\Resources\ReadList\ReadListUserResource;
 use App\Http\Resources\ReadList\ReadListWorkResource;
 use App\Http\Resources\ReadListsResource;
 use App\Http\Resources\WorksResource;
+use App\Models\profile;
 use App\Models\ReadLists;
 use App\Models\ReadListsWorks;
 use App\Models\Works;
@@ -54,7 +55,9 @@ class ReadListsController extends Controller
     public function store(StoreReadListsRequest $request){
         try{
             $validated = $request->validated();
-            $validated['user'] = auth()->id();
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->first();
+            $validated['user'] = $profile->profile_id;
             $exist = ReadLists::where(["user"=>$validated['user'],"name"=>$validated['name']])->first();
             if($exist){
                 return response()->json(["Error"=> "El usuario ya tiene una lista con ese nombre"],500);
@@ -72,7 +75,9 @@ class ReadListsController extends Controller
     public function update(UpdateReadListsRequest $request, string $id){
         try{
             $validated = $request->validated();
-            $validated['user'] = auth()->id();
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->first();
+            $validated['user'] = $profile->profile_id;
             $exist = ReadLists::where(["user"=>$validated['user'],"name"=>$validated['name']])->first();
             if($exist){
                 return response()->json(["Error"=> "El usuario ya tiene una lista con ese nombre"],500);
@@ -139,7 +144,8 @@ class ReadListsController extends Controller
             $work = Works::findOrFail($validated['work']);
             //Make sure the work does not belong to the user but the list does
             $id = auth()->id();
-            if($id !== $list->user || $id === $work->author){
+            $profile = profile::where('user_id',$id)->first();
+            if($profile->profile_id !== $list->user || $profile->profile_id === $work->author){
                 return response()->json(['Error'=>'Usuario no autorizado'],500);
             }
             $list->workRelation()->syncWithoutDetaching($work->work_id);
@@ -157,7 +163,8 @@ class ReadListsController extends Controller
             $work = Works::findOrFail($validated['work']);
             
             $id = auth()->id();
-            if($id !== $list->user || $id === $work->author){
+            $profile = profile::where('user_id',$id)->first();
+            if($profile->profile_id !== $list->user || $profile->profile_id === $work->author){
                 return response()->json(['Error'=>'Usuario no autorizado'],500);
             }
 

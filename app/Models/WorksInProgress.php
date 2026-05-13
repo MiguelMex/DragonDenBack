@@ -47,7 +47,7 @@ class WorksInProgress extends Model
      */
     public function userRelation():BelongsTo
     {
-        return $this->belongsTo(User::class,'author','user_id');
+        return $this->belongsTo(profile::class,'author','profile_id');
     }
 
     public function workRelation():HasOne{

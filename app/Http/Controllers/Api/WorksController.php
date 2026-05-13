@@ -19,6 +19,7 @@ use App\Http\Resources\Works\WorksReadHistoryResource;
 use App\Http\Resources\Works\WorksReadListResource;
 use App\Http\Resources\Works\WorksWipsResource;
 use App\Models\Genres;
+use App\Models\profile;
 use App\Models\User;
 use App\Models\Works;
 use App\Http\Resources\WorksResource;
@@ -78,7 +79,9 @@ class WorksController extends Controller
         try
         {
             $validated = $request->validated();
-            $validated['author'] = auth()->id();
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->first();
+            $validated['author'] = $profile->profile_id;
             $exists = Works::where(['title'=>$validated['title'],'author'=>$validated['author']])->exists();
             if ($exists)
             {
@@ -106,7 +109,9 @@ class WorksController extends Controller
             $work = Works::findOrFail($request->id);
 
             //see that is the author trying to modify the cover
-            if($work->author !== auth()->id()){
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->first();
+            if($work->author !== $profile->profile_id){
                 return response()->json(['Error'=> 'Usuario no autorizado'],500);
             }
 
@@ -150,7 +155,9 @@ class WorksController extends Controller
         try
         {
             $validated = $request->validated();
-            $validated['author'] = auth()->id();
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->first();
+            $validated['author'] = $profile->profile_id;
             $exists = Works::where(['title'=>$validated['title'],'author'=>$validated['author']])->exists();
             if ($exists)
             {
@@ -287,7 +294,8 @@ class WorksController extends Controller
             $work = Works::findOrFail($request->work_id);
             //Check that the user and author are the same
             $id = auth()->id();
-            if($work->author !== $id){
+            $profile = profile::where('user_id',$id)->first();
+            if($work->author !== $profile->profile_id){
                 return response()->json(['Error'=>'Usuario no autorizado'],500);
             }
 

@@ -48,7 +48,7 @@ class Works extends Model
      */
     public function authorRelation(): BelongsTo
     {
-        return $this->belongsTo(User::class,'author','user_id');
+        return $this->belongsTo(profile::class,'author','profile_id');
     }
 
     /**

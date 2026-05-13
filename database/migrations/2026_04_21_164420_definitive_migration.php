@@ -11,6 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
+        //0.Profiles table
+        Schema::create('profiles', function (Blueprint $table) {
+            $table->uuid('profile_id')->primary();
+            $table->foreignUuid('user_id')->unique()->constrained('users', 'user_id')->cascadeOnDelete();
+            $table->string('name',100)->default('Usuario');
+            $table->string('nickname',100)->nullable();
+            $table->string('description', 2000)->nullable();
+            $table->string('avatar', 500)->nullable();
+            $table->timestamps();
+        });
+
         // 1. Age restrictions table
         Schema::create('age_restrictions', function (Blueprint $table) {
             $table->uuid('age_restriction_id')->primary();
@@ -22,7 +33,7 @@ return new class extends Migration
         // 2. Works in progress (wips) table
         Schema::create('wips', function (Blueprint $table) {
             $table->uuid('work_in_progress_id')->primary();
-            $table->foreignUuid('author')->constrained('users', 'user_id')->cascadeOnDelete();
+            $table->foreignUuid('author')->constrained('profiles', 'profile_id')->cascadeOnDelete();
             $table->string('title', 200)->default('Nuevo Proyecto');
             $table->timestamps();
         });
@@ -39,7 +50,7 @@ return new class extends Migration
         // 4. Works table
         Schema::create('works', function (Blueprint $table) {
             $table->uuid('work_id')->primary();
-            $table->foreignUuid('author')->constrained('users', 'user_id')->nullOnDelete();
+            $table->foreignUuid('author')->constrained('profiles', 'profile_id')->nullOnDelete();
             $table->foreignUuid('age_restriction')->constrained('age_restrictions', 'age_restriction_id')->nullOnDelete();
             $table->string('title', 200)->default('Nuevo Proyecto');
             $table->string('description', 3000)->nullable()->default(null);
@@ -79,7 +90,7 @@ return new class extends Migration
             $table->uuid('collection_id')->primary();
             $table->string('name', 200);
             $table->text('description')->default('Sin descripción');
-            $table->foreignUuid('user')->constrained('users', 'user_id')->nullOnDelete();
+            $table->foreignUuid('user')->constrained('profiles', 'profile_id')->nullOnDelete();
             $table->timestamps();
         });
 
@@ -93,7 +104,7 @@ return new class extends Migration
         // 10. Comments table (self-referential response column)
         Schema::create('comments', function (Blueprint $table) {
             $table->uuid('comment_id')->primary();
-            $table->foreignUuid('user')->constrained('users', 'user_id')->nullOnDelete();
+            $table->foreignUuid('user')->constrained('profiles', 'profile_id')->nullOnDelete();
             $table->foreignUuid('chapter')->constrained('chapters', 'chapter_id')->cascadeOnDelete();
             $table->string('text',3000);
             $table->timestamps();
@@ -107,7 +118,7 @@ return new class extends Migration
         // 12. Read history table
         Schema::create('read_histories', function (Blueprint $table) {
             $table->uuid('read_history_id')->primary();
-            $table->foreignUuid('user')->constrained('users', 'user_id')->nullOnDelete();
+            $table->foreignUuid('user')->constrained('profiles', 'profile_id')->nullOnDelete();
             $table->foreignUuid('work')->constrained('works', 'work_id')->nullOnDelete();
             $table->foreignUuid('chapter')->constrained('chapters', 'chapter_id')->nullOnDelete();
             $table->timestamps();
@@ -118,7 +129,7 @@ return new class extends Migration
             $table->uuid('read_list_id')->primary();
             $table->string('name', 200)->default('Mi lista');
             $table->string('description', 3000)->nullable()->default('Nueva lista de lectura');
-            $table->foreignUuid('user')->constrained('users', 'user_id')->cascadeOnDelete();
+            $table->foreignUuid('user')->constrained('profiles', 'profile_id')->cascadeOnDelete();
             $table->timestamps();
         });
 
@@ -131,8 +142,8 @@ return new class extends Migration
 
         // 15. Followers (following) table
         Schema::create('following', function (Blueprint $table) {
-            $table->foreignUuid('follower_id')->constrained('users', 'user_id')->cascadeOnDelete();
-            $table->foreignUuid('user_id')->constrained('users', 'user_id')->cascadeOnDelete();
+            $table->foreignUuid('follower_id')->constrained('profiles', 'profile_id')->cascadeOnDelete();
+            $table->foreignUuid('user_id')->constrained('profiles', 'profile_id')->cascadeOnDelete();
             $table->timestamps();
         });
     }

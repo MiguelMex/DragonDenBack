@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\WIPS;
 
+use App\Http\Resources\Profiles\ProfileResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -20,7 +21,7 @@ class WorkInProgressUserResource extends JsonResource
             'title'=>$this->title,
             'created_at'=>$this->created_at,
             'updated_at'=>$this->updated_at,
-            'author'=>new UserResource($this->whenLoaded('userRelation'))
+            'author'=>new ProfileResource($this->whenLoaded('userRelation'))
         ];
     }
 }

@@ -6,7 +6,11 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Profiles\StoreProfileRequest;
+use App\Http\Resources\Profiles\ProfileResource;
 use App\Http\Resources\UserResource;
+use App\Models\profile;
+use DB;
 use Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -26,10 +30,22 @@ class AuthController extends Controller
             $creator = new CreateNewUser();
             $user = $creator->create($request->all());
 
+            // Create a default profile for the new user
+            $profile = Profile::create([
+                'user_id'     => $user->user_id,
+                'name'        => 'Usuario',
+                'nickname'    => 'Apodo',
+                'description' => 'Nuevo Usuario',
+                'avatar'      => 'avatars/default.jpeg',
+            ]);
+
+            DB::commit();
+
             $token = $user->createToken('auth-token')->plainTextToken;
 
+            //'user' => new UserResource($user),
             return response()->json([
-                'user' => new UserResource($user),
+                'profile' => new ProfileResource($profile),
                 'token' => $token,
             ], 201);
         }
@@ -69,7 +85,9 @@ class AuthController extends Controller
 
     public function user(Request $request)
     {
-        return new UserResource($request->user());
+        $user = $request->user();
+        $profile = profile::where('user_id',$user->user_id)->first();
+        return new ProfileResource($profile);
     }
 
     public function updateProfile(Request $request)

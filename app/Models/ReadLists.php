@@ -39,7 +39,7 @@ class ReadLists extends Model
      */
     public function userRelation(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user','user_id')->withTimeStamps();
+        return $this->belongsTo(profile::class, 'user','profile_id')->withTimeStamps();
     }
 
     /**

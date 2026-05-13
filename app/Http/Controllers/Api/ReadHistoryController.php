@@ -8,6 +8,7 @@ use App\Http\Resources\History\ReadHistoryChapterResource;
 use App\Http\Resources\History\ReadHistoryUserResource;
 use App\Http\Resources\History\ReadHistoryWorkResource;
 use App\Http\Resources\ReadHistoryResource;
+use App\Models\profile;
 use App\Models\ReadHistory;
 use Exception;
 use Illuminate\Http\Request;
@@ -51,7 +52,9 @@ class ReadHistoryController extends Controller
     public function store(StoreReadHistoryRequest $request){
         try{
             $validated = $request->validated();
-            $validated['user'] = auth()->id();
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->first();
+            $validated['user'] = $profile->profile_id;
             $history = ReadHistory::create($validated);
             return new ReadHistoryResource($history);
         }

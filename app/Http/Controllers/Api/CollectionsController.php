@@ -13,6 +13,7 @@ use App\Http\Resources\CollectionsResource;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\WorksResource;
 use App\Models\Collections;
+use App\Models\profile;
 use App\Models\Works;
 use Error;
 use Exception;
@@ -64,16 +65,19 @@ class CollectionsController extends Controller
     {
         try
         {
-            //Se if it already exists for this user
-            $exists = Collections::where(['name'=>$request->name,'user'=>$request->user])->exists();
-            if($exists)
-            {
-                return response()->json(['Error'=>'Ya existe este nombre en las colecciones del usuario']);
-            }
-
+            //Check that the user corresponds to the profile
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->first();
             //se guarda
             $validated = $request->validated();
-            $validated['user'] = auth()->id();
+            $validated['user'] = $profile->profile_id;
+
+            //Se if it already exists for this profile
+            $exists = Collections::where(['name'=>$validated['name'],'user'=>$validated['user']])->exists();
+            if($exists)
+            {
+                return response()->json(['Error'=>'Ya existe este nombre en las colecciones del usuario'],500);
+            }
             $collection = Collections::create($validated);
             return new CollectionsResource($collection);
         }
@@ -174,7 +178,8 @@ class CollectionsController extends Controller
 
             //Check that the work and collection corresponds to the user
             $id = auth()->id();
-            if($id !== $collection->user || $id !== $work->author){
+            $profile = profile::where('user_id',$id)->first();
+            if($profile->profile_id !== $collection->user || $profile->profile_id !== $work->author){
                 return response()->json(['Error'=>'El trabajo debe de pertenecer al usuario'],500);
             }
 
@@ -195,8 +200,9 @@ class CollectionsController extends Controller
             $collection = Collections::findOrFail($validated['collection_id']);
 
             $id = auth()->id();
+            $profile = profile::where('user_id',$id)->first();
 
-            if($id !== $collection->user || $id !== $work->author){
+            if($profile->profile_id !== $collection->user || $profile->profile_id !== $work->author){
                 return response()->json(['Error'=>'El trabajo debe de pertenecer al usuario'],500);
             }
 

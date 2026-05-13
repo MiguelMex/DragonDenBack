@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Works;
 
+use App\Http\Resources\Profiles\ProfileResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -25,7 +26,7 @@ class WorksAuthorResource extends JsonResource
             'work_in_progress'=>$this->work_in_progress,
             'created_at'=>$this->created_at,
             'updated_at'=>$this->updated_at,
-            'author'=> new UserResource($this->whenLoaded('authorRelation'))
+            'author'=> new ProfileResource($this->whenLoaded('authorRelation'))
         ];
     }
 }

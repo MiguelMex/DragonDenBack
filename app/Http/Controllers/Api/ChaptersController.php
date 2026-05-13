@@ -11,6 +11,7 @@ use App\Http\Resources\Chapters\ChaptersWorkResource;
 use App\Http\Resources\ChaptersResource;
 use App\Models\Chapters;
 use App\Models\Drafts;
+use App\Models\profile;
 use App\Models\Works;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -81,7 +82,9 @@ class ChaptersController extends Controller
                 return response()->json(['Error'=>'El borrador no coincide con el proyecto dado'],500);
             }
 
-            if ($work->author !== auth()->id()) {
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->first();
+            if ($work->author !== $profile->profile_id) {
                 return response()->json(['Error' => 'No autorizado para agregar capítulos a este trabajo'], 403);
             }
 
@@ -254,6 +257,9 @@ class ChaptersController extends Controller
         try
         {
             $chapter = Chapters::findOrFail($id);
+            if($chapter->route && Storage::disk('public')->exists($chapter->route)){
+                Storage::disk('public')->delete($chapter->route);
+            }
             $chapter->delete();
             return response()->json(['Mensaje'=>'Capitulo eliminado']);
         }
