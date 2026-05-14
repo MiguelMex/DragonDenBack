@@ -103,6 +103,7 @@ Route::controller(ProfileController::class)->group(function(){
     Route::get('/profiles/{id}/wips','getWips');
     Route::get('/self/wips','getOwnWips')->middleware('auth:sanctum');
     Route::get('/profiles/{id}/histories','getHistories')->middleware('auth:sanctum');
+    Route::get('/self/histories','getOwnHistories')->middleware('auth:sanctum');
     Route::get('/profiles/{id}/works','getWorks');   
     Route::get('/self/works','getOwnWorks')->middleware('auth:sanctum');
     Route::get('/profiles/{id}/lists','getReadList');
@@ -137,6 +138,7 @@ Route::controller(ChaptersController::class)->group(function(){
     Route::delete('/chapters/{id}','destroy')->middleware('auth:sanctum');
     Route::get('/chapters/{id}/work','getWork');
     Route::get('/chapters/{id}/histories','getReadHistory');
+    Route::get('/chapters/{id}/comments','getComments');
     Route::get('/chapters/{id}/draft','getDraft');
     Route::post('/chapters/content','content');
     Route::post('/chapters/updateContent','updateContent');

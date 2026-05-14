@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Chapters\StoreChaptersRequest;
 use App\Http\Requests\Chapters\UpdateChaptersRequest;
+use App\Http\Resources\Chapters\ChaptersCommentsResource;
 use App\Http\Resources\Chapters\ChaptersDraftResource;
 use App\Http\Resources\Chapters\ChaptersHistoryResource;
 use App\Http\Resources\Chapters\ChaptersWorkResource;
@@ -319,6 +320,15 @@ class ChaptersController extends Controller
         catch (Exception $ex)
         {
             return response()->json(['Error'=>$ex->getMessage()]);
+        }
+    }
+
+    public function getComments(string $id){
+        try{
+            $chapter = Chapters::with('commentsRelation')->findOrFail($id);
+            return new ChaptersCommentsResource($chapter);
+        } catch (Exception $ex){
+            return response()->json(['Error: '=>$ex->getMessage()]);
         }
     }
 }

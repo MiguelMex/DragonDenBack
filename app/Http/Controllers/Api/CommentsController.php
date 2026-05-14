@@ -11,6 +11,7 @@ use App\Http\Resources\Comments\CommensParentResource;
 use App\Http\Resources\Comments\CommensUserResource;
 use App\Http\Resources\CommentsResource;
 use App\Models\Comments;
+use App\Models\profile;
 use Exception;
 
 class CommentsController extends Controller
@@ -62,7 +63,9 @@ class CommentsController extends Controller
         try
         {
             $validated = $request->validated();
-            $validated['user'] = auth()->id();
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->first();
+            $validated['user'] = $profile->profile_id;
             $comment = Comments::create($validated);
             return new CommentsResource($comment);
         }

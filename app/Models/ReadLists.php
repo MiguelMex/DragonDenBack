@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\profile;
 
 class ReadLists extends Model
 {
@@ -37,9 +38,9 @@ class ReadLists extends Model
      * Relation with the user table
      * @return BelongsTo<User, ReadLists>
      */
-    public function userRelation(): BelongsTo
+    public function profileRelation(): BelongsTo
     {
-        return $this->belongsTo(profile::class, 'user','profile_id')->withTimeStamps();
+        return $this->belongsTo(profile::class,'user','profile_id');
     }
 
     /**

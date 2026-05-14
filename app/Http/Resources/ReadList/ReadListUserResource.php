@@ -22,7 +22,7 @@ class ReadListUserResource extends JsonResource
             'description'=>$this->description,
             'created_at'=>$this->created_at,
             'updated_at'=>$this->updated_at,
-            'user'=>new ProfileResource($this->whenLoaded('userRelation')),
+            'user'=>new ProfileResource($this->whenLoaded('profileRelation')),
         ];
     }
 }

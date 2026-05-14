@@ -281,6 +281,18 @@ class ProfileController extends Controller
         }
     }
 
+    public function getOwnHistories(){
+        try{
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->first();
+            $user = profile::with('historiesRelation')->findOrFail($profile->profile_id);
+            return new UserHistoryResource($user);
+        }
+        catch(Exception $ex){
+            return response()->json((["Error"=>$ex->getMessage()]));
+        }
+    }
+
     public function follow(FollowingRequest $request){
         try {
             $validated = $request->validated();

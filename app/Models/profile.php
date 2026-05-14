@@ -62,7 +62,7 @@ class profile extends Model
      */
     public function readListsRelation():HasMany
     {
-        return $this->hasMany(ReadLists::class,'user');
+        return $this->hasMany(ReadLists::class,'user','profile_id');
     }
 
     /**

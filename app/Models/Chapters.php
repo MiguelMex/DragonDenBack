@@ -62,6 +62,10 @@ class Chapters extends Model
         return $this->belongsTo(Drafts::class,'draft','draft_id');
     }
 
+    public function commentsRelation(): HasMany{
+        return $this->hasMany(Comments::class,'chapter','chapter_id');
+    }
+
     //In case of deletion
     protected static function booted(): void
     {

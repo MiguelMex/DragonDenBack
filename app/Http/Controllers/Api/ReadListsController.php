@@ -114,7 +114,7 @@ class ReadListsController extends Controller
      */
     public function getUser(string $id){
         try{
-            $list = ReadLists::with('userRelation')->findOrFail($id);
+            $list = ReadLists::with('profileRelation')->findOrFail($id);
             return new ReadListUserResource($list);
         }
         catch(Exception $e){
