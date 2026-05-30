@@ -7,6 +7,7 @@ use App\Http\Requests\Following\FollowingRequest;
 use App\Http\Requests\Profiles\StoreProfileRequest;
 use App\Http\Requests\Profiles\UpdateProfileRequest;
 use App\Http\Resources\Profiles\ProfileResource;
+use App\Http\Resources\ReadHistoryResource;
 use App\Http\Resources\User\UserCollectionResource;
 use App\Http\Resources\User\UserCommentsResource;
 use App\Http\Resources\User\UserFollowersResource;
@@ -16,6 +17,7 @@ use App\Http\Resources\User\UserReadListsResource;
 use App\Http\Resources\User\UserWorksResource;
 use App\Http\Resources\UserWipsCollection;
 use App\Models\profile;
+use App\Models\ReadHistory;
 use Exception;
 
 use Illuminate\Http\Request;
@@ -150,7 +152,17 @@ class ProfileController extends Controller
      */
     public function getWorks(string $id){
         try{
-            $user = profile::with('worksRelation')->findOrFail($id);
+            $user = Profile::with(['worksRelation' => function ($query) {
+                $query->withCount('chapterRelation as chapters_count')
+                    ->with([
+                        'authorRelation',
+                        'ageRestrictionRelation',
+                        'chapterRelation',
+                        'collectionsRelation',
+                        'readListsRelation',
+                        'genresRelation'
+                    ]);
+            }])->findOrFail($id);
             return new UserWorksResource($user);
         }
         catch(Exception $ex){
@@ -234,7 +246,19 @@ class ProfileController extends Controller
         try{
             $id = auth()->id();
             $profile = profile::where('user_id',$id)->first();
-            $user = profile::with('worksRelation')->findOrFail($profile->profile_id);
+            //$user = profile::with('worksRelation')->findOrFail($profile->profile_id);
+            $user = Profile::with(['worksRelation' => function ($query) {
+                $query->withCount('chapterRelation as chapters_count')
+                    ->with([
+                        'authorRelation',
+                        'ageRestrictionRelation',
+                        'chapterRelation',
+                        'collectionsRelation',
+                        'readListsRelation',
+                        'genresRelation'
+                    ]);
+            }])->findOrFail($profile->profile_id);
+
             return new UserWorksResource($user);
         }
         catch(Exception $ex){
@@ -285,8 +309,79 @@ class ProfileController extends Controller
         try{
             $id = auth()->id();
             $profile = profile::where('user_id',$id)->first();
-            $user = profile::with('historiesRelation')->findOrFail($profile->profile_id);
+            $user = profile::with(['historiesRelation' => function($query){
+                $query->with([
+                    'chapterRelation',
+                    'workRelation' => function($query){
+                        $query->withCount('chapterRelation as chapters_count')
+                        ->with([
+                            'authorRelation',
+                            'ageRestrictionRelation',
+                            'chapterRelation',
+                            'collectionsRelation',
+                            'readListsRelation',
+                            'genresRelation'
+                        ]);
+                    }
+                ]);
+            }])->findOrFail($profile->profile_id);
             return new UserHistoryResource($user);
+        }
+        catch(Exception $ex){
+            return response()->json((["Error"=>$ex->getMessage()]));
+        }
+    }
+
+    public function getOwnLatestHistories(){
+        try{
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->firstOrFail();
+
+            $histories = ReadHistory::where('user', $profile->profile_id)
+            ->with([
+                'chapterRelation',
+                'workRelation' => function($query){
+                    $query->withCount('chapterRelation as chapters_count')
+                        ->with([
+                            'authorRelation',
+                            'ageRestrictionRelation',
+                            'chapterRelation',
+                            'collectionsRelation',
+                            'readListsRelation',
+                            'genresRelation'
+                        ]);
+                }
+            ])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('work')  // keep only the latest history per work (first occurrence after sorting)
+            ->take(30);
+
+            return ReadHistoryResource::collection($histories);
+        }
+        catch(Exception $ex){
+            return response()->json((["Error"=>$ex->getMessage()]));
+        }
+    }
+
+    public function getOwnFollowers(){
+        try{
+            $id = auth()->id();
+            $profile = profile::where('user_id', $id)->first();
+            $user = profile::with('followers')->findOrFail($profile->profile_id);
+            return new UserFollowersResource($user);
+        }
+        catch(Exception $ex){
+            return response()->json((["Error"=> $ex->getMessage()]));
+        }
+    }
+
+    public function getOwnFollowing(){
+        try{
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->firstOrFail();
+            $user = profile::with('following')->findOrFail($profile->profile_id);
+            return new UserFollowingResource($user);
         }
         catch(Exception $ex){
             return response()->json((["Error"=>$ex->getMessage()]));
@@ -296,16 +391,45 @@ class ProfileController extends Controller
     public function follow(FollowingRequest $request){
         try {
             $validated = $request->validated();
+
             $id = auth()->id();
-            $profile = profile::where('user_id',$id)->first();
+            $profile = profile::where('user_id',$id)->firstOrFail();
             $validated['follower_id'] = $profile->profile_id;
+
             $follower = profile::findOrFail($validated['follower_id']);
-            $user = profile::find($validated['user_id']);;
-            $follower->following()->syncWithoutDetaching($user->profile_id);
-            $follower->load('following');
-            return new UserFollowingResource($follower);
+
+            $user = profile::findOrFail($validated['user_id']);
+
+            if($follower->profile_id === $user->profile_id){
+                return response()->json(['Error'=>'No puedes seguirte a ti mismo']);
+            }
+
+            $user->followers()->syncWithoutDetaching($follower->profile_id);
+
+            $user->load('followers');
+            return new UserFollowersResource($user);
         } catch (Exception $ex) {
             return response()->json((["Error"=>$ex->getMessage()]));
+        }
+    }
+
+    public function unFollow(FollowingRequest $request){
+        try{
+            $validated = $request-> validated();
+
+            $id = auth()->id();
+            $profile = profile::where('user_id', $id)->firstOrFail();
+            $validated['follower_id'] = $profile->profile_id;
+            $follower = profile::findOrFail($validated['follower_id']);
+
+            $user = profile::findOrFail($validated['user_id']);
+
+            $user->followers()->detach($follower->profile_id);
+
+            $user->load('followers');
+            return new UserFollowersResource($user);
+        } catch (Exception $ex){
+            return response()->json(['Error' => $ex->getMessage()], 500);
         }
     }
 

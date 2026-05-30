@@ -21,7 +21,7 @@ class ReadHistoryController extends Controller
      */
     public function index(){
         try{
-            $history = ReadHistory::all();
+            $history = ReadHistory::with(['workRelation','chapterRelation'])->get();
             return ReadHistoryResource::collection($history);
         }
         catch(Exception $e){
@@ -36,7 +36,7 @@ class ReadHistoryController extends Controller
      */
     public function show(string $id){
         try{
-            $history = ReadHistory::findOrFail($id);
+            $history = ReadHistory::with(['workRelation','chapterRelation'])->findOrFail($id);
             return new ReadHistoryResource($history);
         }
         catch(Exception $e){

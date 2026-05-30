@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\User;
 
+use App\Http\Resources\Profiles\ProfileResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\UserResource;
@@ -22,7 +23,7 @@ class UserFollowersResource extends JsonResource
             'description' => $this->description,
             'created_at'=> $this->created_at,
             'updated_at'=> $this->updated_at,
-            'followers'=> UserResource::collection($this->whenLoaded("followers")),
+            'followers'=> ProfileResource::collection($this->whenLoaded("followers")),
         ];
     }
 }

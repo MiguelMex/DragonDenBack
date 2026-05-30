@@ -20,6 +20,8 @@ class ProfileResource extends JsonResource
             'nickname'=>$this->nickname,
             'description'=>$this->description,
             'avatar'=>$this->avatar,
+            'works_count' => $this->works_count,
+            'collections_count' => $this->collections_count,
             'created_at'=>$this->created_at,
             'updated_at'=>$this->updated_at
         ];

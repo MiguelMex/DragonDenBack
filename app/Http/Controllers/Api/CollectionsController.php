@@ -143,7 +143,19 @@ class CollectionsController extends Controller
     {
         try
         {
-            $collection = Collections::with('workRelation')->findOrFail($id);
+            $collection = Collections::with([
+                'workRelation' => function($query) {
+                    $query->withCount('chapterRelation as chapters_count')
+                    ->with([
+                            'authorRelation',
+                            'genresRelation',
+                            'ageRestrictionRelation',
+                            'chapterRelation',
+                            'collectionsRelation',
+                            'readListsRelation'
+                    ]);
+                }
+            ])->findOrFail($id);
             return new CollectionsWorkResource( $collection );
         }
         catch (Exception $ex)

@@ -16,10 +16,9 @@ class ReadHistoryResource extends JsonResource
     {
         return [
             'id'=>$this->read_history_id,
-            'read_date'=>$this->read_date,
             'user'=> $this->user,
-            'work'=> $this->work,
-            'chapter'=>$this->chapter,
+            'work'=> new WorksResource($this->whenLoaded('workRelation')),
+            'chapter'=> new ChaptersResource($this->whenLoaded('chapterRelation')),
             'created_at'=>$this->created_at,
             'updated_at'=>$this->updated_at
         ];

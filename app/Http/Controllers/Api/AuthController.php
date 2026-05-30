@@ -51,7 +51,7 @@ class AuthController extends Controller
         }
         catch (Exception $ex)
         {
-            return response()->json(['Error'=>$ex->getMessage(), 'Sent'=>$request->all()]);
+            return response()->json(['Error'=>$ex->getMessage(), 'Sent'=>$request->all()], 422);
         }
     }
 
@@ -86,7 +86,10 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $user = $request->user();
-        $profile = profile::where('user_id',$user->user_id)->first();
+        $profile = profile::where('user_id',$user->user_id)
+        ->withCount('worksRelation as works_count')
+        ->withCount('collectionsRelation as collections_count')
+        ->first();
         return new ProfileResource($profile);
     }
 

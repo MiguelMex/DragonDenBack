@@ -42,7 +42,40 @@ class WorksController extends Controller
     {
         try
         {
-            $works = Works::all();
+            $works = Works::with([
+                'genresRelation',
+                'authorRelation',
+                'ageRestrictionRelation',
+                'chapterRelation',
+                'collectionsRelation',
+                'readListsRelation',
+                ])
+                ->withCount('chapterRelation as chapters_count')
+                ->orderBy('updated_at','desc')
+                ->get();
+            return WorksResource::collection($works);
+        }
+        catch (Exception $ex)
+        {
+            return response()->json(['Error'=>$ex->getMessage()],500);
+        }
+    }
+
+    public function latestWorks()
+    {
+        try
+        {
+            $works = Works::with([
+                'genresRelation',
+                'authorRelation',
+                'ageRestrictionRelation',
+                'chapterRelation',
+                'collectionsRelation',
+                ])
+                ->withCount('chapterRelation as chapters_count')
+                ->latest('updated_at')
+                ->limit(100)
+                ->get();
             return WorksResource::collection($works);
         }
         catch (Exception $ex)
@@ -60,7 +93,16 @@ class WorksController extends Controller
     {
         try
         {
-            $work = Works::findOrFail($id);
+            $work = Works::with([
+                'genresRelation',
+                'authorRelation',
+                'ageRestrictionRelation',
+                'chapterRelation',
+                'collectionsRelation',
+                'readListsRelation'
+                ])
+                ->withCount('chapterRelation as chapters_count')
+                ->findOrFail($id);
             return new WorksResource($work);
         }
         catch (Exception $ex)
@@ -147,10 +189,10 @@ class WorksController extends Controller
     /**
      * Update a work
      * @param UpdateWorksRequest $request
-     * @param string $id
+     * @param string $workId
      * @return WorksResource|\Illuminate\Http\JsonResponse
      */
-    public function update(UpdateWorksRequest $request, String $id)
+    public function update(UpdateWorksRequest $request, String $workId)
     {
         try
         {
@@ -165,7 +207,7 @@ class WorksController extends Controller
             }
 
             //If title is not already on use for this user
-            $work = Works::findOrFail($id);
+            $work = Works::findOrFail($workId);
             $work->update($validated);
             $work->touch();
             return new WorksResource($work);

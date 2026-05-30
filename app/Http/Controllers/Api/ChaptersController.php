@@ -107,6 +107,9 @@ class ChaptersController extends Controller
             $validated['route'] = $fileName;
             $validated['cover'] = 'covers/default.jpeg';
             $chapter = Chapters::create($validated);
+
+            Works::where('work_id', $chapter->work)->touch();
+
             return new ChaptersResource($chapter);
         }
         catch (Exception $ex)
@@ -147,6 +150,8 @@ class ChaptersController extends Controller
 
             $chapter->touch();
 
+            Works::where('work_id', $chapter->work)->touch();
+
             return response()->json(['Mensaje'=> 'Contenido actualizado exitosamente'],200);
         }
         catch (Exception $ex){
@@ -162,7 +167,7 @@ class ChaptersController extends Controller
     public function storeCover(Request $request){
         try{
             $request->validate([
-                'id'=>['required',Rule::exists('works','work_id')],
+                'id'=>['required',Rule::exists('chapters','chapter_id')],
                 'image'=>'required|file|max:2048'
             ]);
 
@@ -171,7 +176,9 @@ class ChaptersController extends Controller
 
             //see that is the author trying to modify the cover
             $work = Works::findOrFail($chapter->work);
-            if($work->author !== auth()->id()){
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->firstOrFail();
+            if($work->author !== $profile->profile_id){
                 return response()->json(['Error'=> 'Usuario no autorizado'],500);
             }
 

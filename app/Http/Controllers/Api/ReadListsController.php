@@ -129,7 +129,19 @@ class ReadListsController extends Controller
      */
     public function getWork($id){
         try{
-            $list = ReadLists::with('workRelation')->findOrFail($id);
+            $list = ReadLists::with(['workRelation',
+                'workRelation' => function($query) {
+                    $query->withCount('chapterRelation as chapters_count')
+                    ->with([
+                        'authorRelation',
+                        'genresRelation',
+                        'ageRestrictionRelation',
+                        'chapterRelation',
+                        'collectionsRelation',
+                        'readListsRelation'
+                    ]);
+                }
+            ])->findOrFail($id);
             return new ReadListWorkResource($list);
         }
         catch(Exception $e){

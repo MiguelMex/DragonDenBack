@@ -87,11 +87,11 @@ class profile extends Model
     }
 
     public function following():BelongsToMany{
-        return $this->belongsToMany(User::class,'following','user_id','follower_id')->withTimestamps();
+        return $this->belongsToMany(profile::class,'following','user_id','follower_id')->withTimestamps();
     }
 
     public function followers():BelongsToMany{
-        return $this->belongsToMany(User::class,'following','follower_id','user_id')->withTimestamps();
+        return $this->belongsToMany(profile::class,'following','follower_id','user_id')->withTimestamps();
     }
 
 }

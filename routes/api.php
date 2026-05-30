@@ -103,6 +103,7 @@ Route::controller(ProfileController::class)->group(function(){
     Route::get('/profiles/{id}/wips','getWips');
     Route::get('/self/wips','getOwnWips')->middleware('auth:sanctum');
     Route::get('/profiles/{id}/histories','getHistories')->middleware('auth:sanctum');
+    Route::get('/self/recent_histories','getOwnLatestHistories')->middleware('auth:sanctum');
     Route::get('/self/histories','getOwnHistories')->middleware('auth:sanctum');
     Route::get('/profiles/{id}/works','getWorks');   
     Route::get('/self/works','getOwnWorks')->middleware('auth:sanctum');
@@ -112,8 +113,11 @@ Route::controller(ProfileController::class)->group(function(){
     Route::get('/profiles/{id}/collections','getCollections');
     Route::get('/self/collections','getOwnCollections')->middleware('auth:sanctum');
     Route::get('/profiles/{id}/following','getFollowing');
+    Route::get('/self/following','getOwnFollowing')->middleware('auth:sanctum');
     Route::get('/profiles/{id}/followers','getFollowers');
-    Route::get('/profiles/{id}/follow','follow')->middleware('auth:sanctum');
+    Route::get('self/followers','getOwnFollowers')->middleware('auth:sanctum');
+    Route::post('/profiles/follow','follow')->middleware('auth:sanctum');
+    Route::post('/profiles/unfollow','unFollow')->middleware(('auth:sanctum'));
 });
 
 /**
@@ -142,6 +146,7 @@ Route::controller(ChaptersController::class)->group(function(){
     Route::get('/chapters/{id}/draft','getDraft');
     Route::post('/chapters/content','content');
     Route::post('/chapters/updateContent','updateContent');
+    Route::post('chapters/cover','storeCover')->middleware(('auth:sanctum'));
 });
 
 /**
@@ -149,6 +154,7 @@ Route::controller(ChaptersController::class)->group(function(){
  */
 Route::controller(WorksController::class)->group(function(){
     Route::get('/works','index');
+    Route::get('works/latest','latestWorks');
     Route::get('/works/{id}','show');
     Route::post('/works','store')->middleware('auth:sanctum');
     Route::post('/works/storeCover','storeCover')->middleware('auth:sanctum');
@@ -218,7 +224,7 @@ Route::controller(CommentsController::class)->group(function(){
 Route::controller(ReadHistoryController::class)->group(function(){
     Route::get('/history','index');
     Route::get('/history/{id}','show');
-    Route::post('/history','store');
+    Route::post('/history','store')->middleware('auth:sanctum');
     Route::put('/history/{id}','update')->middleware('auth:sanctum');
     Route::delete('/history/{id}','destroy')->middleware('auth:sanctum');
     Route::get('/history/{id}/user','getUser')->middleware('auth:sanctum');
