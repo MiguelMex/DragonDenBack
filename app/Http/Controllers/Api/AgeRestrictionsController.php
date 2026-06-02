@@ -56,6 +56,10 @@ class AgeRestrictionsController extends Controller
     {
         try
         {
+            if(!auth()->user()->admin){
+                return response()->json(['Error'=>'Usuario no autorizado'],403);
+            }
+
             $exists = AgeRestrictions::where('name',$request->name)->exists();
             if($exists)
             {
@@ -81,6 +85,18 @@ class AgeRestrictionsController extends Controller
     {
         try
         {
+            if(!auth()->user()->admin){
+                return response()->json(['Error'=>'Usuario no autorizado'],403);
+            }
+
+            $exists = AgeRestrictions::where('name', $request->name)
+                        ->where('age_restriction_id', '!=', $id)
+                        ->exists();
+
+            if($exists){
+                return response()->json(['Error'=>'Ya existe un modelo con es enombre']);
+            }
+
             $restriction = AgeRestrictions::findOrFail($id);
             $restriction->update($request->validated());
             $restriction->touch();
@@ -119,6 +135,10 @@ class AgeRestrictionsController extends Controller
     {
         try
         {
+            if(!auth()->user()->admin){
+                return response()->json(['Error'=>'Usuario no autorizado'],403);
+            }
+            
             $restriction = AgeRestrictions::with('workRelation')->findOrFail($id);
             return new AgeRestrictionWorksResource($restriction);
         }

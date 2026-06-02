@@ -60,6 +60,10 @@ class GenresController extends Controller
     {
         try
         {
+            if(!auth()->user()->admin){
+                return response()->json(['Error'=>'Usuario no autorizado'],403);
+            }
+
             $exists = Genres::where('name',$request->name)->exists();
             if($exists)
             {
@@ -85,7 +89,20 @@ class GenresController extends Controller
     {
         try
         {
+            if(!auth()->user()->admin){
+                return response()->json(['Error'=>'Usuario no autorizado'],403);
+            }
+
             $genre = Genres::findOrFail($id);
+
+            $exists = Genres::where('name',$request->name)
+                        ->where('genre_id', '!=', $id)
+                        ->exists();
+
+            if($exists){
+                return response()->json(['Error'=>'Ese genero ya existe'],500);
+            }
+
             $genre->update($request->validated());
             $genre->touch();
             return new GenresResource($genre);
@@ -105,6 +122,9 @@ class GenresController extends Controller
     {
         try
         {
+            if(!auth()->user()->admin){
+                return response()->json(['Error'=>'Usuario no autorizado'],403);
+            }
             Genres::findOrFail($id)->delete();
             return response()->json(['El genero ah sido borrado exitosamente'],200);
         }
@@ -141,6 +161,19 @@ class GenresController extends Controller
             $genre->load('workRelation');
             return new GenreWorksResource($genre);
         } catch (Exception $ex) {
+            return response()->json(['Error'=> $ex->getMessage()],500);
+        }
+    }
+
+    public function detachWork(GenreWorkRequest $request){
+        try{
+            $validated = $request->validated();
+            $genre = Genres::findOrFail($validated['genre_id']);
+            $work = Works::findOrFail($validated['work_id']);
+            $genre->workRelation()->detachOrFail($work->work_id);
+            $genre->load('workRelation');
+            return new GenreWorksResource($genre);
+        } catch (Exception $ex){
             return response()->json(['Error'=> $ex->getMessage()],500);
         }
     }

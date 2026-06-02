@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Profiles\ProfileResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,7 +18,7 @@ class UserResource extends JsonResource
         return [
             'id' => $this->user_id,
             'email' => $this->email,
-            'password'=>$this->password,
+            'profile' => new ProfileResource($this->whenLoaded('profileRelation')),
             'created_at'=> $this->created_at,
             'updated_at'=> $this->updated_at
         ];

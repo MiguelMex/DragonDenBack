@@ -85,7 +85,7 @@ class ChaptersController extends Controller
 
             $id = auth()->id();
             $profile = profile::where('user_id',$id)->first();
-            if ($work->author !== $profile->profile_id) {
+            if ($work->author !== $profile->profile_id && !auth()->user()->admin) {
                 return response()->json(['Error' => 'No autorizado para agregar capítulos a este trabajo'], 403);
             }
 
@@ -178,7 +178,7 @@ class ChaptersController extends Controller
             $work = Works::findOrFail($chapter->work);
             $id = auth()->id();
             $profile = profile::where('user_id',$id)->firstOrFail();
-            if($work->author !== $profile->profile_id){
+            if($work->author !== $profile->profile_id && !auth()->user()->admin){
                 return response()->json(['Error'=> 'Usuario no autorizado'],500);
             }
 
@@ -245,6 +245,15 @@ class ChaptersController extends Controller
         try
         {
             $chapter = Chapters::findOrFail($id);
+
+            //see that is the author trying to modify the cover
+            $work = Works::findOrFail($chapter->work);
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->firstOrFail();
+            if($work->author !== $profile->profile_id && !auth()->user()->admin){
+                return response()->json(['Error'=> 'Usuario no autorizado'],500);
+            }
+
             $chapter->update($request->validated());
             $chapter->touch();
             return new ChaptersResource($chapter);
@@ -265,6 +274,15 @@ class ChaptersController extends Controller
         try
         {
             $chapter = Chapters::findOrFail($id);
+
+            //see that is the author trying to modify the cover
+            $work = Works::findOrFail($chapter->work);
+            $id = auth()->id();
+            $profile = profile::where('user_id',$id)->firstOrFail();
+            if($work->author !== $profile->profile_id && !auth()->user()->admin){
+                return response()->json(['Error'=> 'Usuario no autorizado'],500);
+            }
+
             if($chapter->route && Storage::disk('public')->exists($chapter->route)){
                 Storage::disk('public')->delete($chapter->route);
             }

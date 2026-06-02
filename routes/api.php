@@ -72,7 +72,8 @@ Route::controller(GenresController::class)->group(function(){
     Route::put('/genres/{id}','update')->middleware('auth:sanctum');
     Route::delete('/genres/{id}','destroy')->middleware('auth:sanctum');
     Route::get('/genres/{id}/works','work');
-    Route::post('/genres/addwork','addWork');
+    Route::post('/genres/addwork','addWork')->middleware('auth:sanctum');
+    Route::post('/genres/detachWork','detachWork')->middleware('auth:sanctum');
 });
 
 /**
@@ -86,8 +87,11 @@ Route::get('/user',[AuthController::class,'user']);
  * Routes to pull user's resources
  */
 Route::controller(UsersController::class)->group(function(){
-    Route::get('/users','index');
-    Route::delete('users/{id}','destroy');
+    Route::get('/users','index')->middleware('auth:sanctum');
+    Route::get('/users/{id}','show')->middleware('auth:sanctum');
+    Route::post('/users','store')->middleware('auth:sanctum');
+    Route::put('/users/{id}','update')->middleware('auth:sanctum');
+    Route::delete('/users/{id}','destroy')->middleware('auth:sanctum');
 });
 
 /**
@@ -128,7 +132,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::put('/password', [AuthController::class, 'updatePassword']);
-    Route::put('avatar',[AuthController::class,'updateAvatar']);
+    //Route::put('avatar',[AuthController::class,'updateAvatar']);
+    Route::get('/admin', [AuthController::class, 'adminCheck']);
 });
 
 /**
@@ -171,6 +176,7 @@ Route::controller(WorksController::class)->group(function(){
     Route::get('/works/{id}/collections','getCollection');
     Route::get('/works/{id}/wip','getWips');
     Route::post('/works/addGenre','addGenre')->middleware('auth:sanctum');
+    Route::post('/works/updateGenres','updateGenres')->middleware('auth:sanctum');
 });
 
 /**

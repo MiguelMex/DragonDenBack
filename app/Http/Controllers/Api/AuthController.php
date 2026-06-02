@@ -31,7 +31,7 @@ class AuthController extends Controller
             $user = $creator->create($request->all());
 
             // Create a default profile for the new user
-            $profile = Profile::create([
+            $profile = profile::create([
                 'user_id'     => $user->user_id,
                 'name'        => 'Usuario',
                 'nickname'    => 'Apodo',
@@ -91,6 +91,15 @@ class AuthController extends Controller
         ->withCount('collectionsRelation as collections_count')
         ->first();
         return new ProfileResource($profile);
+    }
+
+    public function adminCheck(Request $request){
+        try{
+            $user = $request->user();
+            return response()->json(['admin' => (bool) $user->admin]);
+        } catch (Exception $ex){
+            return response()->json(['Error'=>$ex->getMessage()],500);
+        }
     }
 
     public function updateProfile(Request $request)

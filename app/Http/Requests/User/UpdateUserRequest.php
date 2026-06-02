@@ -3,6 +3,7 @@
 namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return auth()->check() && auth()->user()->admin;
     }
 
     /**
@@ -21,8 +22,15 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        $userId = $this->route('id');
         return [
-            'nickname'=>'nullable|string|max:100',
+            'email' => [
+                'sometimes',
+                'email',
+                Rule::unique('users', 'email')->ignore($userId, 'user_id'),
+            ],
+            'password' => 'sometimes|string|min:8|confirmed',
+            'admin' => 'sometimes|boolean',
         ];
     }
 }

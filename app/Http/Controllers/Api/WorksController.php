@@ -24,6 +24,7 @@ use App\Models\User;
 use App\Models\Works;
 use App\Http\Resources\WorksResource;
 use App\Http\Resources\CollectionsResource;
+use App\Models\WorksInProgress;
 use Exception;
 use Illuminate\Foundation\Http\Middleware\Concerns\ExcludesPaths;
 use Illuminate\Http\Request;
@@ -124,6 +125,13 @@ class WorksController extends Controller
             $id = auth()->id();
             $profile = profile::where('user_id',$id)->first();
             $validated['author'] = $profile->profile_id;
+
+            //revisar que el autor sea el mismo que el del wip o que sea administrador
+            $wip = WorksInProgress::findOrFail($validated['work_in_progress']);
+            if($validated['author'] !== $wip->author && !auth()->user()->admin){
+                return response()->json(['Error' => 'Usuario no autorizado'],403);
+            }
+
             $exists = Works::where(['title'=>$validated['title'],'author'=>$validated['author']])->exists();
             if ($exists)
             {
@@ -153,8 +161,8 @@ class WorksController extends Controller
             //see that is the author trying to modify the cover
             $id = auth()->id();
             $profile = profile::where('user_id',$id)->first();
-            if($work->author !== $profile->profile_id){
-                return response()->json(['Error'=> 'Usuario no autorizado'],500);
+            if($work->author !== $profile->profile_id && !auth()->user()->admin){
+                return response()->json(['Error'=> 'Usuario no autorizado'],403);
             }
 
             //get the extension of the file
@@ -197,17 +205,33 @@ class WorksController extends Controller
         try
         {
             $validated = $request->validated();
+
             $id = auth()->id();
             $profile = profile::where('user_id',$id)->first();
-            $validated['author'] = $profile->profile_id;
-            $exists = Works::where(['title'=>$validated['title'],'author'=>$validated['author']])->exists();
-            if ($exists)
-            {
-                return response()->json(['Error'=>'este autor ya posee ese titulo'],500);
+
+            if(!auth()->user()->admin){
+
+                $validated['author'] = $profile->profile_id;
+                $exists = Works::where([
+                    'title'=>$validated['title'],
+                    'author'=>$validated['author'],
+                    ])
+                    ->where('work_id', '!=', $workId)
+                    ->exists();
+                if ($exists)
+                {
+                    return response()->json(['Error'=>'este autor ya posee ese titulo'],409);
+                }
             }
 
             //If title is not already on use for this user
             $work = Works::findOrFail($workId);
+
+            //User's check
+            if($profile->profile_id !== $work->author && !auth()->user()->admin){
+                return response()->json(['Error'=>'Usuario no autorizado'],403);
+            }
+
             $work->update($validated);
             $work->touch();
             return new WorksResource($work);
@@ -228,6 +252,10 @@ class WorksController extends Controller
         try
         {
             $work = Works::findOrFail($id);
+            $profile = profile::where('user_id', auth()->id())->firstOrFail();
+            if($profile->profile_id !== $work->author && !auth()->user()->admin){
+                return response()->json(['Error'=>'Usuario no autorizado'],403);
+            }
             if($work->cover && Storage::disk('public')->exists($work->cover)){
                 Storage::disk('public')->delete($work->cover);
             }
@@ -352,6 +380,40 @@ class WorksController extends Controller
             return new WorksGenresResource($work);
         } catch (Exception $ex){
             return response()->json(['Error'=>$ex->getMessage()],500);
+        }
+    }
+
+    /**
+     * Update the genres of a work (replace all existing genres with the given list, max 2).
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|WorksGenresResource
+     */
+    public function updateGenres(Request $request)
+    {
+        try {
+            $request->validate([
+                'work_id' => ['required', Rule::exists('works', 'work_id')],
+                'genre_ids' => ['array', 'max:2'],
+                'genre_ids.*' => ['uuid', Rule::exists('genres', 'genre_id')],
+            ]);
+
+            $work = Works::findOrFail($request->work_id);
+
+            // Authorization: only the author or an admin can edit genres
+            $userId = auth()->id();
+            $profile = profile::where('user_id', $userId)->first();
+            if ($work->author !== $profile->profile_id && !auth()->user()->admin) {
+                return response()->json(['Error' => 'Usuario no autorizado'], 403);
+            }
+
+            // Sync the genres – this will remove any existing genres and attach the new ones
+            $work->genresRelation()->sync($request->genre_ids);
+            $work->load('genresRelation');
+
+            return new WorksGenresResource($work);
+        } catch (Exception $ex) {
+            return response()->json(['Error' => $ex->getMessage()], 500);
         }
     }
 

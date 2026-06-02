@@ -29,8 +29,8 @@ class WorksInProgressController extends Controller
     {
         try
         {
-            $wips = WorksInProgress::all();
-            return WorksInProgressResource::collection($wips);
+            $wips = WorksInProgress::with(['draftsRelation','userRelation'])->get();
+            return WipDraftsResource::collection($wips);
         }
         catch (Exception $ex)
         {
@@ -80,6 +80,9 @@ class WorksInProgressController extends Controller
     {
         try {
             $workInProgress = WorksInProgress::findOrFail($id);
+            if(!auth()->user()->admin && $workInProgress->author !== auth()->id()){
+                return response()->json(['Error'=>'Usuario no autorizado'],403);
+            }   
             $workInProgress->update($wip->validated());
             return new WorksInProgressResource($workInProgress);
         } catch (Exception $e) {

@@ -42,6 +42,7 @@ class User extends Authenticatable
     protected $fillable = [
         'email',
         'password',
+        'admin'
     ];
 
     /**
@@ -61,71 +62,8 @@ class User extends Authenticatable
      * @return HasOne<profile, User>
      */
     public function profileRelation(): HasOne{
-        return $this->hasOne(profile::class,'user_id','profile_id');
+        return $this->hasOne(profile::class,'user_id','user_id');
     }
-
-    // /**
-    //  * Relationship with the read_history table
-    //  * 
-    //  * @return HasMany
-    //  */
-    // public function historiesRelation(): HasMany
-    // {
-    //     return $this->hasMany(ReadHistory::class,'user');
-    // }
-
-    // public function wipsRelation(): HasMany
-    // {
-    //     return $this->hasMany(WorksInProgress::class,'author');
-    // }
-
-    // /**
-    //  * Relation with the Works table
-    //  * 
-    //  * @return HasMany
-    //  */
-    // public function worksRelation(): HasMany
-    // {
-    //     return $this->hasMany(Works::class,'author');
-    // }
-
-    // /**
-    //  * Relation with the readlist table
-    //  * @return HasMany<ReadLists, User>
-    //  */
-    // public function readListsRelation():HasMany
-    // {
-    //     return $this->hasMany(ReadLists::class,'user');
-    // }
-
-    // /**
-    //  * Relationship with the comment table
-    //  * 
-    //  * @return HasMany
-    //  */
-    // public function commentsRelation(): HasMany
-    // {
-    //     return $this->hasMany(Comments::class,'user');
-    // }
-
-    // /**
-    //  * Relation with the collections table
-    //  * 
-    //  * 
-    //  * @return HasMany<Collections, User>
-    //  */
-    // public function collectionsRelation():HasMany
-    // {
-    //     return $this->hasMany(Collections::class,'user');
-    // }
-
-    // public function following():BelongsToMany{
-    //     return $this->belongsToMany(User::class,'following','user_id','follower_id')->withTimestamps();
-    // }
-
-    // public function followers():BelongsToMany{
-    //     return $this->belongsToMany(User::class,'following','follower_id','user_id')->withTimestamps();
-    // }
 
     /**
      * Get the attributes that should be cast.

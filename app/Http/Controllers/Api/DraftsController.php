@@ -10,6 +10,7 @@ use App\Http\Resources\Draft\DraftWipResource;
 use App\Http\Resources\DraftsResource;
 use App\Http\Resources\WorksInProgressResource;
 use App\Models\Drafts;
+use App\Models\WorksInProgress;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -62,6 +63,7 @@ class DraftsController extends Controller
             $validated['route'] = $fileName;
 
             $draft = Drafts::create($validated);
+            WorksInProgress::where('work_in_progress_id',$draft->work_in_progress)->touch();
             return new DraftsResource($draft);
         }
         catch (Exception $ex)
@@ -101,6 +103,7 @@ class DraftsController extends Controller
             }
 
             $draft->touch();
+            WorksInProgress::where('work_in_progress_id',$draft->work_in_progress)->touch();
             return new DraftsResource($draft);
         }
         catch (Exception $ex){

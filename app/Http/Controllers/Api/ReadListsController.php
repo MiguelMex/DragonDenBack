@@ -18,13 +18,28 @@ use Exception;
 
 class ReadListsController extends Controller
 {
+
+    /**
+     * Check if the list belongs to the authenticated user or the user is an admin.
+     *
+     * @param ReadLists $list
+     * @return bool
+     */
+    private function isAuthorizedForCollection(ReadLists $list): bool
+    {
+        $userId = auth()->id();
+        $profile = Profile::where('user_id', $userId)->first();
+
+        return ($profile && $profile->profile_id === $list->user) || auth()->user()->admin;
+    }
+
     /**
      * return all read lists
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index(){
         try{
-            $lists = ReadLists::all();
+            $lists = ReadLists::with(['workRelation', 'profileRelation'])->get();
             return ReadListsResource::collection($lists);
         }
         catch(Exception $ex){
@@ -72,23 +87,33 @@ class ReadListsController extends Controller
     }
 
 
-    public function update(UpdateReadListsRequest $request, string $id){
+    public function update(UpdateReadListsRequest $request, string $listid){
         try{
             $validated = $request->validated();
             $id = auth()->id();
             $profile = profile::where('user_id',$id)->first();
-            $validated['user'] = $profile->profile_id;
-            $exist = ReadLists::where(["user"=>$validated['user'],"name"=>$validated['name']])->first();
-            if($exist){
-                return response()->json(["Error"=> "El usuario ya tiene una lista con ese nombre"],500);
+
+            if(!auth()->user()->admin){
+                $validated['user'] = $profile->profile_id;
+                $exist = ReadLists::where(["user"=>$validated['user'],"name"=>$validated['name']])
+                ->with('read_list_id', '!=', $listid)
+                ->first();
+                if($exist){
+                    return response()->json(["Error"=> "El usuario ya tiene una lista con ese nombre"],500);
+                }
             }
 
-            $list = ReadLists::findOrFail($id);
+            $list = ReadLists::findOrFail($listid);
+
+            if(!$this->isAuthorizedForCollection($list)){
+                return response()->json(['Error' => 'Usuario no autorizado'], 403);
+            }
+
             $list->update($validated);
             return new ReadListsResource($list);
         }
         catch(Exception $e){
-            return response()->json(["Error"=>"Error al actualizar lista"],500);
+            return response()->json(["Error"=>$e->getMessage()],500);
         }
     }
 
@@ -99,7 +124,14 @@ class ReadListsController extends Controller
      */
     public function destroy(string $id){
         try{
-            ReadLists::find($id)->delete();
+            $list = ReadLists::find($id);
+
+            if(!$this->isAuthorizedForCollection($list)){
+                return response()->json(['Error' => 'Usuario no autorizado'], 403);
+            }
+
+            $list->delete();
+
             return response()->json(["Lista eliminada correctamente"],200);
         }
         catch(Exception $e){
@@ -177,7 +209,7 @@ class ReadListsController extends Controller
             $id = auth()->id();
             $profile = profile::where('user_id',$id)->first();
             if($profile->profile_id !== $list->user || $profile->profile_id === $work->author){
-                return response()->json(['Error'=>'Usuario no autorizado'],500);
+                return response()->json(['Error'=>'Usuario no autorizado'],403);
             }
 
             $list->workRelation()->detach($work->work_id);

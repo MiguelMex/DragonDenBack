@@ -21,6 +21,21 @@ use Illuminate\Http\Request;
 
 class CollectionsController extends Controller
 {
+
+    /**
+     * Check if the collection belongs to the authenticated user or the user is an admin.
+     *
+     * @param Collections $collection
+     * @return bool
+     */
+    private function isAuthorizedForCollection(Collections $collection): bool
+    {
+        $userId = auth()->id();
+        $profile = Profile::where('user_id', $userId)->first();
+
+        return ($profile && $profile->profile_id === $collection->user) || auth()->user()->admin;
+    }
+
     /**
      * Get all Collections
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\AnonymousResourceCollection
@@ -29,8 +44,8 @@ class CollectionsController extends Controller
     {
         try
         {
-            $collections = Collections::all();
-            return CollectionsResource::collection($collections);
+            $collections = Collections::with(['workRelation','userRelation'])->get();
+            return CollectionsWorkResource::collection($collections);
         }
         catch (Exception $ex)
         {
@@ -98,7 +113,9 @@ class CollectionsController extends Controller
         try
         {
             //Se if it already exists for this user
-            $exists = Collections::where(['name'=>$request->name,'user'=>$request->user])->exists();
+            $exists = Collections::where(['name'=>$request->name,'user'=>$request->user])
+            ->where('collection_id','!=',$id)
+            ->exists();
             if($exists)
             {
                 return response()->json(['Error'=>'Ya existe este nombre en las colecciones del usuario']);
@@ -106,6 +123,11 @@ class CollectionsController extends Controller
 
             //store the changes
             $collection = Collections::findOrFail($id);
+
+            if(!$this->isAuthorizedForCollection($collection)){
+                return response()->json(['Error' => 'Usuario no autorizado'], 403);
+            }
+
             $collection->update($request->validated());
             $collection->touch();
             return new CollectionsResource($collection);
@@ -125,7 +147,13 @@ class CollectionsController extends Controller
     {
         try
         {
-            Collections::findOrFail($id)->delete();
+            $collection = Collections::findOrFail($id);
+
+            if(!$this->isAuthorizedForCollection($collection)){
+                return response()->json(['Error' => 'Usuario no autorizado'], 403);
+            }
+
+            $collection->delete();
             return response()->json(['Message'=>'Colección eliminada correctamente']);
         }
         catch (Exception $ex)
