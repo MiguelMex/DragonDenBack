@@ -1,7 +1,13 @@
-'paths' => ['api/*', 'sanctum/csrf-cookie'],
-'allowed_origins' => ['https://your-frontend-domain.vercel.app'],
-'allowed_methods' => ['*'],
-'allowed_headers' => ['*'],
-'exposed_headers' => [],
-'max_age' => 0,
-'supports_credentials' => true,
+<?php
+
+return [
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'allowed_methods' => ['*'],
+    'allowed_origins' => ['https://dragon-den-front-git-master-miguel-mex-s-projects.vercel.app/'],
+    'allowed_origins_patterns' => [],
+    'allowed_headers' => ['*'],
+    'exposed_headers' => [],
+    'max_age' => 0,
+    'supports_credentials' => false,
+
+];
