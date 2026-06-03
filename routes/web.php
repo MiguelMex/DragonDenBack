@@ -11,4 +11,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 });
 
+// routes/web.php
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok']);
+});
+
 require __DIR__.'/settings.php';
