@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["nodejs_22", "npm", "php83", "composer", "nginx", "mysql-client"]
+
+[phases.install]
+cmds = ["composer install --no-dev --optimize-autoloader", "npm ci"]
+
+[phases.build]
+cmds = ["php artisan optimize", "npm run build"]
+
+[start]
+cmd = "php artisan migrate --force && php artisan storage:link && php artisan queue:work --daemon & php artisan schedule:work & php-fpm"

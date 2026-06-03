@@ -3,7 +3,8 @@
     "builder": "NIXPACKS",
     "buildCommand": "composer install --no-dev --optimize-autoloader && php artisan optimize && npm ci && npm run build",
     "environment": {
-        "NODE_VERSION": "22"
+      "NODE_VERSION": "22",
+      "NIXPACKS_NODE_VERSION": "22"
     }
   },
   "deploy": {
