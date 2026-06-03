@@ -1,7 +1,8 @@
 {
   "deploy": {
-    "startCommand": "php artisan migrate --force && php artisan storage:link && php artisan queue:work & php artisan schedule:work & php-fpm -F",
+    "startCommand": "php artisan migrate --force && php artisan storage:link && php artisan queue:work & php artisan schedule:work & frankenphp run",
     "healthcheckPath": "/health",
+    "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE"
   }
 }
