@@ -1,8 +1,7 @@
 {
   "deploy": {
-    "startCommand": "php artisan migrate --force && php artisan storage:link && frankenphp run --config /Caddyfile",
+    "postdeploy": "php artisan migrate --force && php artisan storage:link",
     "healthcheckPath": "/health",
-    "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE"
   }
 }
