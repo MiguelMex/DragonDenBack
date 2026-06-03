@@ -1,0 +1,11 @@
+{
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "composer install --no-dev --optimize-autoloader && php artisan optimize && npm ci && npm run build"
+  },
+  "deploy": {
+    "startCommand": "php artisan migrate --force && php artisan storage:link && php artisan queue:work --daemon & php artisan schedule:work & php-fpm",
+    "healthcheckPath": "/health",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
