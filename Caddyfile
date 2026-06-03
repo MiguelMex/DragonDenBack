@@ -1,5 +1,5 @@
 :8080 {
     root * public
-    php_fastcgi * php:9000
+    php_fastcgi * localhost:9000
     file_server
 }
