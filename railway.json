@@ -1,6 +1,6 @@
 {
   "deploy": {
-    "postdeploy": "php artisan migrate --force && php artisan storage:link",
+    "postdeploy": "php artisan migrate --force && php artisan db:seed --force && php artisan storage:link",
     "healthcheckPath": "/health",
     "restartPolicyType": "ON_FAILURE"
   }
