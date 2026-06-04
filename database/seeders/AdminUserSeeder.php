@@ -21,10 +21,12 @@ class AdminUserSeeder extends Seeder
         $password = env('ADMIN_PASSWORD', 'password');
 
         // Check if user already exists
+        $userID = Str::uuid()->toString();
+
         $user = User::where('email', $email)->first();
         if (!$user) {
             User::create([
-                'user_id'   => Str::uuid()->toString(),
+                'user_id'   => $userID,
                 'email'     => $email,
                 'password'  => Hash::make($password),
                 'admin'     => true,
@@ -35,7 +37,7 @@ class AdminUserSeeder extends Seeder
 
             // Create a default profile for the new user
             $profile = profile::create([
-                'user_id'     => $user->user_id,
+                'user_id'     => $userID,
                 'name'        => 'Usuario',
                 'nickname'    => 'Apodo',
                 'description' => 'Nuevo Usuario',
