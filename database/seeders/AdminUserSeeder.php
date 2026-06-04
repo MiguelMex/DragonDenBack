@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\profile;
 use App\Models\User;
+use DB;
 use Hash;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -15,7 +17,7 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        $email = env('ADMIN_EMAIL', 'admin@example.com');
+        $email = env('ADMIN_EMAIL', 'admin@gmail.com');
         $password = env('ADMIN_PASSWORD', 'password');
 
         // Check if user already exists
@@ -30,6 +32,19 @@ class AdminUserSeeder extends Seeder
                 'updated_at' => now(),
             ]);
             $this->command->info("Admin user created with email: {$email}");
+
+            // Create a default profile for the new user
+            $profile = profile::create([
+                'user_id'     => $user->user_id,
+                'name'        => 'Usuario',
+                'nickname'    => 'Apodo',
+                'description' => 'Nuevo Usuario',
+                'avatar'      => 'avatars/default.jpeg',
+            ]);
+
+            DB::commit();
+            $this->command->info("Profile user created with email: {$email}");
+            
         } else {
             // Optionally update existing user's admin status
             if (!$user->admin) {
