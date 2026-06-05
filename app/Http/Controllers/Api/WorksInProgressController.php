@@ -48,7 +48,9 @@ class WorksInProgressController extends Controller
             $id = auth()->id();
             $profile = profile::where('user_id',$id)->first();
             $validated['author'] = $profile->profile_id;
-            $exists = WorksInProgress::where('title',$validated['title'])->exists();
+            $exists = WorksInProgress::where('title',$validated['title'])
+            ->where('author',$validated['author'])
+            ->exists();
             if ($exists)
             {
                 return response()->json(['Error'=>'Nombre ya existente'],500);
